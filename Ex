@@ -1,0 +1,101 @@
+<?php
+
+namespace Drupal\ex_form\Form;
+
+use Drupal\Core\Form\FormBase;																			
+use Drupal\Core\Form\FormStateInterface;													
+
+
+class ExForm extends FormBase {
+
+	public function buildForm(array $form, FormStateInterface $form_state) {
+
+		$form['name'] = [
+			'#type' => 'textfield',
+			'#title' => $this->t('Имя'),
+			'#description' => $this->t('Имя не должно содержать цифр'),
+			'#required' => TRUE,
+		];
+
+      $form['surname'] = [
+			'#type' => 'textfield',
+			'#title' => $this->t('Фамилия'),
+			'#description' => $this->t('Фамилия не должна содержать цифр'),
+			'#required' => TRUE,
+		];
+
+    $form['subject'] = [
+			'#type' => 'textfield',
+			'#title' => $this->t('Предмет'),
+			'#required' => TRUE,
+		];
+
+    $form['message'] = [
+			'#type' => 'textfield',
+			'#title' => $this->t('Сообщение'),
+			'#required' => TRUE,
+		];
+
+    $form['email'] = [
+			'#type' => 'textfield',
+			'#title' => $this->t('E-mail'),
+			'#required' => TRUE,
+		];
+
+		$form['actions']['submit'] = [
+			'#type' => 'submit',
+			'#value' => $this->t('Отправить форму'),
+		];
+
+		return $form;
+	}
+
+
+	public function getFormId() {
+		return 'ex_form_exform_form';
+	}
+
+
+	public function validateForm(array &$form, FormStateInterface $form_state) {
+		$title = $form_state->getValue('name');
+    $title = $form_state->getValue('surname');
+		$is_number = preg_match("/[\d]+/", $title, $match);
+
+		if ($is_number > 0) {
+			$form_state->setErrorByName('name', $this->t('Строка содержит цифру.'));
+      $form_state->setErrorByName('surnamename', $this->t('Строка содержит цифру.'));
+		}
+	}
+
+
+	public function submitForm(array &$form, FormStateInterface $form_state) {
+		drupal_set_message($this->t('Thank you @name,your e-mail is @email', array(
+    '@name' => $form_state ->getValue('name'),
+    '@surname' => $form_state ->getValue('surname'),
+    '@subject' => $form_state ->getValue('subject'),
+    '@message' => $form_state ->getValue('message'),
+    '@email' => $form_state ->getValue('email')
+    )));
+	}
+
+}
+
+function example_callback() {
+  $to     = 'ganster.vovan@mail.ru';
+  $key    = 'example_email';
+  $params = array(
+    'body' => t('message')
+  );
+  drupal_mail('example', $key, $to, language_default(), $params);
+}
+
+
+function example_mail($key, &$message, $params) {
+  switch ($key) {
+    
+    case 'example_email':
+      $message['subject'] = t('Example Email');
+      $message['body'][] = $params['body'];
+      break;
+  }
+}
